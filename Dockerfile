@@ -1,4 +1,4 @@
-FROM gradle
+FROM gradle:jdk8
 
 LABEL maintainer <alexander.malic@maastrichtuniversity.nl>
 
@@ -8,8 +8,10 @@ WORKDIR /app
 
 COPY . .
 
-RUN ./gradlew build -x compileTestJava -x processTestResources -x testClasses -x checkstyleTest
+RUN gradle build -x check -x processTestResources -x testClasses -x checkstyleTest && \
+  mkdir /data && ln -s /data output && ls -al output
 
-RUN mkdir /data && ln -s /data output
+# Run the app once, because subsequent builds will be faster
+# RUN gradle -a run && rm -rf ./output/*
 
-ENTRYPOINT ["./run_synthea"]
+ENTRYPOINT ["gradle", "-a", "run" , "-x", "compileJava"]
